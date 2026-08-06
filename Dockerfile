@@ -1,12 +1,16 @@
-FROM python:3.12-slim
+FROM python:3.12-alpine
 
 WORKDIR /app
 
 COPY requirements.txt .
+
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-EXPOSE 8501
+EXPOSE 8000
 
-CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+HEALTHCHECK --interval=30s --timeout=3s \
+CMD wget -qO- http://localhost:8000/health || exit 1
+
+CMD ["uvicorn","main:app","--host","0.0.0.0","--port","8000"]
