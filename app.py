@@ -1,71 +1,41 @@
-import streamlit as st
-import psutil
-import time
-import random
+from fastapi import FastAPI
 from datetime import datetime
+import socket
+import os
 
-st.set_page_config(
-    page_title="VeloCore Demo",
-    page_icon="🚀",
-    layout="wide"
-)
+app = FastAPI(title="VeloCore Demo")
 
-st.title("🚀 VeloCore Deployment Demo")
-st.caption("Self-Hosted Kubernetes Platform")
+START = datetime.utcnow()
 
-cpu, mem, disk, req = st.columns(4)
+@app.get("/")
+def root():
+    return {
+        "platform": "VeloCore",
+        "status": "running",
+        "hostname": socket.gethostname()
+    }
 
-cpu.metric(
-    "CPU",
-    f"{psutil.cpu_percent()}%"
-)
+@app.get("/health")
+def health():
+    return {
+        "status": "healthy"
+    }
 
-mem.metric(
-    "Memory",
-    f"{psutil.virtual_memory().percent}%"
-)
+@app.get("/ready")
+def ready():
+    return {
+        "status": "ready"
+    }
 
-disk.metric(
-    "Disk",
-    f"{psutil.disk_usage('/').percent}%"
-)
+@app.get("/live")
+def live():
+    return {
+        "status": "alive"
+    }
 
-req.metric(
-    "Requests",
-    random.randint(1200, 4200)
-)
-
-st.divider()
-
-st.subheader("Recent Deployment Events")
-
-logs = [
-    "Repository cloned",
-    "Dependencies installed",
-    "Docker image built",
-    "Security scan passed",
-    "Image pushed",
-    "Kubernetes deployment created",
-    "Pods are Ready",
-    "Ingress configured",
-    "Deployment successful"
-]
-
-for log in logs:
-    st.success(f"{datetime.now().strftime('%H:%M:%S')}   {log}")
-
-st.divider()
-
-st.subheader("Runtime Health")
-
-st.progress(random.randint(70,100))
-
-st.code("""
-STATUS      : RUNNING
-FRAMEWORK   : Streamlit
-RUNTIME     : Kubernetes
-SECURITY    : PASSED
-HEALTH      : HEALTHY
-""")
-
-st.caption("Powered by VeloCore 🚀")
+@app.get("/info")
+def info():
+    return {
+        "python": os.sys.version,
+        "uptime": str(datetime.utcnow() - START)
+    }
