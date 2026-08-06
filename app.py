@@ -1,19 +1,26 @@
 from fastapi import FastAPI
 from datetime import datetime
 import socket
+import platform
 import os
+import time
 
-app = FastAPI(title="VeloCore Demo")
+app = FastAPI(
+    title="VeloCore Demo",
+    version="1.0.0"
+)
 
-START = datetime.utcnow()
+START_TIME = time.time()
+
 
 @app.get("/")
 def root():
     return {
-        "platform": "VeloCore",
+        "message": "🚀 Running on VeloCore",
         "status": "running",
         "hostname": socket.gethostname()
     }
+
 
 @app.get("/health")
 def health():
@@ -21,11 +28,13 @@ def health():
         "status": "healthy"
     }
 
+
 @app.get("/ready")
 def ready():
     return {
         "status": "ready"
     }
+
 
 @app.get("/live")
 def live():
@@ -33,9 +42,13 @@ def live():
         "status": "alive"
     }
 
+
 @app.get("/info")
 def info():
     return {
-        "python": os.sys.version,
-        "uptime": str(datetime.utcnow() - START)
+        "platform": "VeloCore",
+        "hostname": socket.gethostname(),
+        "python": platform.python_version(),
+        "uptime_seconds": round(time.time() - START_TIME, 2),
+        "environment": dict(os.environ)
     }
